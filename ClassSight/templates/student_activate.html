@@ -1,0 +1,6 @@
+{% extends 'auth_base.html' %}
+{% block title %}Activate student account{% endblock %}
+{% block heading %}Welcome, {{ invitation.name }}{% endblock %}
+{% block description %}{{ invitation.student_id }} · {{ invitation.section }} · {{ invitation.batch }}{% endblock %}
+{% block form %}<form method="post" class="stack-form">{{ csrf() }}<label>Login email<input type="email" value="{{ invitation.email }}" readonly aria-readonly="true" autocomplete="username"></label><label>Choose password<span class="password-field"><input type="password" name="password" id="activation-password" minlength="8" maxlength="128" required autocomplete="new-password"><button type="button" class="password-toggle" data-password="activation-password" aria-label="Show password">Show</button></span></label><label>Confirm password<input type="password" name="confirm_password" minlength="8" maxlength="128" required autocomplete="new-password"></label><small class="field-help">Use 8–128 characters. This account gives access to your own performance record.</small><button class="btn btn-primary btn-block" type="submit">Activate student account {{ icon('arrow') }}</button></form>{% endblock %}
+{% block bottom %}Already activated? <a href="{{ url_for('login', role='student') }}">Student sign in</a>{% endblock %}

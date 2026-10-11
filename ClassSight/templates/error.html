@@ -1,0 +1,4 @@
+{% extends 'base.html' if current_user else 'auth_base.html' %}
+{% block title %}{{ code }} · Request unavailable{% endblock %}{% block page_title %}Request unavailable{% endblock %}{% block heading %}Request unavailable{% endblock %}
+{% block content %}<section class="card"><div class="empty-state"><span class="error-code">{{ code }}</span><h2>{{ message }}</h2><a class="btn btn-primary" href="{{ url_for(home_endpoint()) }}">Return to overview</a></div></section>{% endblock %}
+{% block form %}<div class="error-code">{{ code }}</div><p>{{ message }}</p><a class="btn btn-primary btn-block" href="{{ url_for('login') }}">Return to sign in</a>{% endblock %}

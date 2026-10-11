@@ -1,0 +1,6 @@
+{% extends 'base.html' %}
+{% from '_macros.html' import empty with context %}
+{% block title %}My performance{% endblock %}
+{% block page_title %}{{ product_name }}{% endblock %}
+{% block subtitle %}{{ product_description }}{% endblock %}
+{% block content %}<section class="card">{{ empty('No course records yet', 'Your teacher will add course marks and attendance to your academic record.') }}</section>{% endblock %}

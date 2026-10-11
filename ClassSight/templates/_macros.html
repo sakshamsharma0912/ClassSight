@@ -1,0 +1,62 @@
+{% macro icon(name, cls='icon') -%}
+<svg class="{{ cls }}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+{% if name == 'dashboard' %}<rect x="3" y="3" width="7" height="7" rx="1.4"/><rect x="14" y="3" width="7" height="7" rx="1.4"/><rect x="3" y="14" width="7" height="7" rx="1.4"/><rect x="14" y="14" width="7" height="7" rx="1.4"/>
+{% elif name == 'students' %}<circle cx="9" cy="8" r="3"/><path d="M3 21v-3a6 6 0 0 1 12 0v3M16 5a3 3 0 0 1 0 6M17 15a5 5 0 0 1 4 5"/>
+{% elif name == 'attendance' %}<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4M17 3v4M3 11h18m-12 5 2 2 4-4"/>
+{% elif name == 'marks' %}<path d="m3 6 9-4 9 4-9 4-9-4Zm4 3v7c4 3 6 3 10 0V9M21 6v10"/>
+{% elif name == 'courses' %}<path d="M12 4c-4-2-7-1-9 0v16c3-2 6-2 9 0 3-2 6-2 9 0V4c-2-1-5-2-9 0Zm0 0v16"/>
+{% elif name == 'reports' %}<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6Zm0 0v6h6M8 12h8M8 16h8"/>
+{% elif name == 'warning' %}<path d="m12 3 10 18H2L12 3Zm0 6v5m0 3h.01"/>
+{% elif name == 'settings' %}<path d="m9 3-1 3-3 1-2 3 2 2-1 4 3 2 3-1 2 4 4-1 1-3 3-1 2-3-2-2 1-4-3-2-3 1-2-4-4 1Z"/><circle cx="12" cy="12" r="3"/>
+{% elif name == 'upload' %}<path d="M12 16V3m-5 5 5-5 5 5M3 15v6h18v-6"/>
+{% elif name == 'download' %}<path d="M12 3v13m-5-5 5 5 5-5M3 16v5h18v-5"/>
+{% elif name == 'plus' %}<path d="M12 5v14M5 12h14"/>
+{% elif name == 'arrow' %}<path d="M5 12h14m-5-5 5 5-5 5"/>
+{% elif name == 'logout' %}<path d="M9 3H3v18h6m6-14 5 5-5 5M8 12h12"/>
+{% elif name == 'search' %}<circle cx="10" cy="10" r="6"/><path d="m15 15 5 5"/>
+{% elif name == 'edit' %}<path d="m14 4 6 6M4 20l5-1L21 7l-4-4L5 15l-1 5Z"/>
+{% elif name == 'check' %}<path d="m4 12 5 5L20 6"/>
+{% elif name == 'menu' %}<path d="M3 6h18M3 12h18M3 18h18"/>
+{% elif name == 'close' %}<path d="m6 6 12 12M6 18 18 6"/>
+{% elif name == 'clock' %}<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>
+{% elif name == 'chart' %}<path d="M4 4v16h17M8 16v-5m5 5V7m5 9v-8"/>
+{% elif name == 'target' %}<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/>
+{% endif %}</svg>
+{%- endmacro %}
+
+{% macro csrf() -%}<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">{%- endmacro %}
+{% macro attendance_badge(row) -%}
+<span class="badge {{ 'badge-danger' if row.attendance_status == 'Below 75%' else 'badge-success' if row.eligible else 'badge-neutral' }}">{{ row.attendance_status }}</span>
+{%- endmacro %}
+{% macro margin(row) -%}
+{% if row.max_hours %}<span class="margin {{ 'text-danger' if row.margin < 0 else 'text-success' }}">{{ '%+d'|format(row.margin) }} <small>h</small></span>{% else %}<span class="muted">—</span>{% endif %}
+{%- endmacro %}
+{% macro filters_bar(filters, action, all_courses=true, status=true, search=true, analyzer=false) -%}
+<form class="filter-bar" method="get" action="{{ action }}" aria-label="Academic record filters">
+{% if filters.student %}<input type="hidden" name="student" value="{{ filters.student }}">{% endif %}
+{% if search %}<label class="filter-search"><span class="sr-only">Search registration number or student name</span>{{ icon('search') }}<input name="q" value="{{ filters.q }}" placeholder="Registration no. or name" maxlength="80" type="search"></label>{% endif %}
+<label class="filter-field"><span>Section</span><select name="section"><option value="">All sections</option>{% for section in scope.sections %}<option value="{{ section }}" {{ 'selected' if filters.section == section }}>{{ section }}</option>{% endfor %}</select></label>
+<label class="filter-field"><span>Batch</span><select name="batch"><option value="">All batches</option>{% for batch in scope.batches %}<option value="{{ batch }}" {{ 'selected' if filters.batch == batch }}>{{ batch }}</option>{% endfor %}</select></label>
+<label class="filter-field filter-course"><span>Course</span><select name="course">{% if all_courses %}<option value="">All courses</option>{% endif %}{% for code, title in courses %}<option value="{{ code }}" {{ 'selected' if filters.course == code }}>{{ code }} · {{ title }}</option>{% endfor %}</select></label>
+{% if status %}<label class="filter-field"><span>Attendance</span><select name="status"><option value="">All statuses</option><option value="below" {{ 'selected' if filters.status == 'below' }}>Below 75%</option><option value="eligible" {{ 'selected' if filters.status == 'eligible' }}>Eligible</option><option value="not_started" {{ 'selected' if filters.status == 'not_started' }}>Not started</option></select></label>{% endif %}
+{% if analyzer %}<label class="filter-field"><span>Overall grade</span><select name="grade"><option value="">All grades</option>{% for grade,minimum in grade_options %}<option value="{{ grade }}" {{ 'selected' if filters.grade == grade }}>{{ grade }}</option>{% endfor %}<option value="Pending" {{ 'selected' if filters.grade == 'Pending' }}>Pending</option></select></label><label class="filter-field"><span>Performance</span><select name="performance"><option value="">All students</option>{% for state in ['At Risk','Watchlist','On Track','Pending'] %}<option value="{{ state }}" {{ 'selected' if filters.performance == state }}>{{ state }}</option>{% endfor %}</select></label><label class="filter-field"><span>Sort students</span><select name="order">{% for value,label in [('name','Student name'),('highest','Highest score'),('lowest','Lowest score'),('attendance','Lowest attendance')] %}<option value="{{ value }}" {{ 'selected' if filters.order == value }}>{{ label }}</option>{% endfor %}</select></label>{% endif %}
+<div class="filter-buttons"><button class="btn btn-primary btn-sm" type="submit">Apply</button><a class="btn btn-ghost btn-sm" href="{{ action }}">Reset</a></div>
+</form>
+{%- endmacro %}
+
+{% macro empty(title, description, action_url='', action_label='') -%}
+<div class="empty-state">{{ icon('courses', 'empty-icon') }}<h3>{{ title }}</h3><p>{{ description }}</p>{% if action_url %}<a class="btn btn-primary" href="{{ action_url }}">{{ action_label }}</a>{% endif %}</div>
+{%- endmacro %}
+
+{% macro mark_fields(values, prefix='') -%}
+<div class="component-form">{% for key, label, cap in components %}<label><span>{{ label }} <small>/ {{ cap }}</small></span><input type="number" name="{{ prefix }}{{ key }}" min="0" max="{{ cap }}" step="0.01" value="{{ values.get(key, '') }}" inputmode="decimal"><small class="field-help">Leave blank if not evaluated.</small></label>{% endfor %}</div>
+{%- endmacro %}
+
+{% macro attendance_table(rows, summary, show_course=true, actions=true) -%}
+<div class="table-scroll"><table class="data-table attendance-table">
+<caption class="sr-only">Course-wise attendance with cumulative student-hours</caption>
+<thead><tr><th>Registration no. / Student</th><th>Section / Batch</th>{% if show_course %}<th>Course</th>{% endif %}<th class="num">Max hours</th><th class="num">Attended</th><th class="num">Absent</th><th class="num">Attendance</th><th class="num">Margin</th><th class="num">Future hours</th><th>Status</th>{% if actions %}<th>Action</th>{% endif %}</tr></thead>
+<tbody>{% for row in rows %}<tr><td><a class="student-link" href="{{ student_course_url( pk=row.student_pk, course=row.course_code) }}">{{ row.student_id }}</a><span class="cell-sub">{{ row.name }}</span></td><td>{{ row.section }}<span class="cell-sub">{{ row.batch }}</span></td>{% if show_course %}<td><span class="course-code">{{ row.course_code }}</span><span class="cell-sub course-cell">{{ row.course_title }}</span></td>{% endif %}<td class="num">{{ row.max_hours }}</td><td class="num">{{ row.attended_hours }}</td><td class="num">{{ row.absent_hours }}</td><td class="num {{ 'text-danger' if row.attendance_status == 'Below 75%' }}">{{ '%.2f%%'|format(row.attendance_pct) if row.attendance_pct is not none else '—' }}</td><td class="num">{{ margin(row) }}</td><td class="num">{% if not row.max_hours %}<span class="muted">—</span>{% elif row.eligible %}<strong class="text-success">{{ row.can_miss }}</strong><span class="cell-sub">Can miss</span>{% else %}<strong class="text-danger">{{ row.recover_hours }}</strong><span class="cell-sub">Attend to recover</span>{% endif %}</td><td>{{ attendance_badge(row) }}</td>{% if actions %}<td><a class="btn btn-ghost btn-sm" href="{{ url_for('edit_record', pk=row.id, kind='attendance') }}" aria-label="Edit attendance for {{ row.name }} in {{ row.course_code }}">{{ icon('edit') }} Edit</a></td>{% endif %}</tr>{% endfor %}</tbody>
+<tfoot><tr><th colspan="{{ 3 if show_course else 2 }}">{{ 'Attendance summary' if is_student_view else 'Class summary' }} <span class="footer-sub">{% if not is_student_view %}{{ summary.students }} students · {% endif %}{{ summary.records }} course records</span></th><td class="num">{{ summary.max_hours }}</td><td class="num">{{ summary.attended_hours }}</td><td class="num">{{ summary.absent_hours }}</td><td class="num">{{ '%.2f%%'|format(summary.attendance_pct) if summary.attendance_pct is not none else '—' }}</td><td class="num">{{ '%+d'|format(summary.margin) }} h</td><td class="num">—</td><td>{{ summary.at_risk }} below 75%</td>{% if actions %}<td></td>{% endif %}</tr></tfoot>
+</table></div>
+{%- endmacro %}

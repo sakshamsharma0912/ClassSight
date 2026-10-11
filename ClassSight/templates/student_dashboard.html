@@ -1,0 +1,7 @@
+{% extends 'detail.html' %}
+{% from '_macros.html' import icon with context %}
+{% block title %}My performance{% endblock %}
+{% block eyebrow %}MY ACADEMIC PERFORMANCE{% endblock %}
+{% block page_title %}{{ product_name }}{% endblock %}
+{% block subtitle %}{{ product_description }}{% endblock %}
+{% block actions %}<a class="btn btn-outline" href="{{ url_for('student_settings') }}">{{ icon('students') }} My profile</a><a class="btn btn-primary" href="{{ url_for('student_reports') }}">{{ icon('download') }} My reports</a>{% endblock %}

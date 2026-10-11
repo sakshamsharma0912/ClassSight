@@ -1,0 +1,4 @@
+{% extends 'base.html' %}{% from '_macros.html' import csrf, icon with context %}
+{% block title %}Remove student{% endblock %}{% block page_title %}Remove student{% endblock %}
+{% block subtitle %}Review this record before deleting it.{% endblock %}
+{% block content %}<section class="card form-card"><div class="form-padding"><h2>{{ student.name }}</h2><p class="muted">{{ student.student_id }} · {{ student.section }} · {{ student.batch }}</p><div class="notice notice-danger">{{ icon('warning') }}<span>The student profile and all course marks and attendance will be deleted. Previously issued letter snapshots and session history are retained.</span></div><form method="post" action="{{ url_for('delete_student',pk=student.id) }}">{{ csrf() }}<div class="form-actions"><a class="btn btn-outline" href="{{ url_for('student_detail',pk=student.id) }}">Cancel</a><button class="btn btn-danger" type="submit">Delete student</button></div></form></div></section>{% endblock %}

@@ -1,0 +1,8 @@
+{% extends 'base.html' %}
+{% from '_macros.html' import icon with context %}
+{% block title %}My reports{% endblock %}
+{% block page_title %}My academic reports{% endblock %}
+{% block subtitle %}Your course attendance and component marks in a downloadable report.{% endblock %}
+{% block content %}
+<section class="card"><div class="card-heading"><div><h2>{{ current_user.name }}</h2><p>{{ current_user.student_id }} · {{ current_user.section }} · {{ current_user.batch }}</p></div><span class="badge badge-blue">{{ summary.records }} course records</span></div><div class="form-padding stack-form"><p class="field-help">Reports include your recorded attendance, attendance margins, seven mark components, grades and totals.</p><div class="heading-actions">{% for format, label in [('pdf','Download PDF'),('xlsx','Download Excel'),('csv','Download CSV')] %}<a class="btn {{ 'btn-primary' if format == 'pdf' else 'btn-outline' }}" href="{{ url_for('student_download_report', format=format) }}">{{ icon('download') }} {{ label }}</a>{% endfor %}</div></div></section>
+{% endblock %}

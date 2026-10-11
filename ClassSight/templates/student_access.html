@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% from '_macros.html' import icon, csrf with context %}
+{% block title %}Student login access{% endblock %}
+{% block page_title %}Student login access{% endblock %}
+{% block subtitle %}{{ student.name }} · {{ student.student_id }} · {{ student.section }} · {{ student.batch }}{% endblock %}
+{% block actions %}<a class="btn btn-outline" href="{{ url_for('student_detail', pk=student.id) }}">Back to student</a>{% endblock %}
+{% block content %}
+<div class="settings-layout">
+<section class="card"><div class="card-heading"><h2>Invite this student</h2></div>
+<form class="form-padding stack-form" method="post">{{ csrf() }}
+<label>Student login email<input type="email" name="email" maxlength="254" required autocomplete="off" value="{{ account.email if account else pending.email if pending else student.email }}"></label>
+<p class="field-help">The student chooses their own password using a single-use activation link. A new link replaces any outstanding link and expires after 48 hours.</p>
+<button class="btn btn-primary" type="submit">{{ icon('plus') }} Create activation link</button></form>
+{% if activation_link %}<div class="form-padding stack-form activation-link-panel"><label>Activation link<input id="activation-link" type="url" value="{{ activation_link }}" readonly aria-readonly="true"></label><small class="field-help">Expires {{ expiry }}. Share directly with {{ student.name }}. An existing account is updated only when the link is activated.</small><button class="btn btn-outline" type="button" data-copy-input="activation-link">Copy activation link</button><p data-copy-status role="status" aria-live="polite"></p></div>{% endif %}
+</section>
+<section class="card"><div class="card-heading"><h2>Access status</h2></div><div class="form-padding stack-form">
+{% if account %}<span class="badge {{ 'badge-success' if account.active else 'badge-neutral' }}">{{ 'Active' if account.active else 'Revoked' }}</span><p>Login email: <strong>{{ account.email }}</strong></p>{% else %}<span class="badge badge-neutral">Not activated</span><p>This student has not activated a login account.</p>{% endif %}
+{% if pending %}<p class="field-help">An activation link is pending for {{ pending.email }}.</p>{% endif %}
+<p class="field-help">Student access covers this roster entry only. Class analytics, other students, mark editing, attendance recording and faculty reports remain available to teachers.</p>
+{% if account or pending %}<form method="post" action="{{ url_for('revoke_student_access', pk=student.id) }}">{{ csrf() }}<button class="btn btn-danger" type="submit">Revoke student access</button></form><p class="field-help">Revocation signs out student sessions and invalidates outstanding links. Academic records are retained.</p>{% endif %}
+</div></section></div>
+{% endblock %}

@@ -1,0 +1,36 @@
+{% from '_macros.html' import icon, csrf with context %}
+<!doctype html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#153457"><meta name="description" content="{{ product_description }}"><title>{% block title %}Academic workspace{% endblock %} · {{ product_name }}</title><link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}"><link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}"><script defer src="{{ url_for('static', filename='js/main.js') }}"></script>{% block scripts %}{% endblock %}</head>
+<body><a href="#main-content" class="skip-link">Skip to content</a><div class="app-shell">
+<aside class="sidebar" id="sidebar">
+<a class="brand" href="{{ url_for(home_endpoint()) }}"><span class="brand-mark">{{ icon('chart') }}</span><span><strong>{{ product_name }}</strong><small>{{ product_description }}</small></span></a>
+<div class="sidebar-campus">{{ workspace.campus }}<span>{{ workspace.department }}</span></div>
+<div class="nav-label">{{ 'STUDENT WORKSPACE' if is_student_view else 'TEACHER WORKSPACE' }}</div>
+<nav class="sidebar-nav" aria-label="Main navigation">
+{% if is_student_view %}
+<a class="nav-link {{ 'active' if request.endpoint == 'student_dashboard' }}" href="{{ url_for('student_dashboard') }}" {% if request.endpoint == 'student_dashboard' %}aria-current="page"{% endif %}>{{ icon('dashboard') }}<span>My performance</span></a>
+{% if current_user.has_course_records %}
+<a class="nav-link" href="{{ url_for('student_dashboard') }}#course-attendance">{{ icon('attendance') }}<span>My attendance</span></a>
+<a class="nav-link" href="{{ url_for('student_dashboard') }}#component-marks">{{ icon('marks') }}<span>My marks</span></a>
+<a class="nav-link" href="{{ url_for('student_dashboard') }}#overall-goal-seeker">{{ icon('target') }}<span>What-if simulator</span></a>
+{% endif %}
+<div class="nav-label">MY ACCOUNT & REPORTS</div>
+{% for endpoint, symbol, label in [('student_reports','reports','My reports'),('student_settings','settings','My profile')] %}<a class="nav-link {{ 'active' if request.endpoint == endpoint }}" href="{{ url_for(endpoint) }}" {% if request.endpoint == endpoint %}aria-current="page"{% endif %}>{{ icon(symbol) }}<span>{{ label }}</span></a>{% endfor %}
+{% else %}
+{% set navigation = [('dashboard','dashboard','Performance overview'),('performance_analytics','chart','Performance analytics'),('students','students','Student directory'),('attendance','attendance','Attendance'),('register_grid','marks','Mark evaluation'),('course_catalogue','courses','Course catalogue')] %}
+{% for endpoint, symbol, label in navigation %}{% set active = request.endpoint == endpoint or (endpoint == 'performance_analytics' and request.endpoint == 'export_analysis') or (endpoint == 'students' and request.endpoint in ['student_detail','add_student','edit_student','remove_student','edit_record','student_access']) or (endpoint == 'attendance' and request.endpoint in ['edit_attendance','record_session','session_detail']) %}<a class="nav-link {{ 'active' if active }}" href="{{ url_for(endpoint) }}" {% if active %}aria-current="page"{% endif %}>{{ icon(symbol) }}<span>{{ label }}</span></a>{% endfor %}
+<div class="nav-label">DATA & REPORTING</div>
+{% for endpoint, symbol, label in [('import_csv','upload','CSV import'),('reports','reports','Department reports'),('warnings','warning','Shortage letters'),('settings','settings','Faculty settings')] %}<a class="nav-link {{ 'active' if request.endpoint == endpoint }}" href="{{ url_for(endpoint) }}" {% if request.endpoint == endpoint %}aria-current="page"{% endif %}>{{ icon(symbol) }}<span>{{ label }}</span></a>{% endfor %}
+{% endif %}
+</nav>
+<div class="sidebar-footer"><span class="live-dot"></span>Academic year {{ workspace.academic_year }}<small>Semester {{ workspace.semester }} · 75% attendance minimum</small></div>
+</aside>
+<div class="sidebar-backdrop" id="sidebar-backdrop" hidden></div><div class="main-shell">
+<header class="topbar"><div class="topbar-left"><button class="icon-btn mobile-nav-toggle" id="nav-toggle" aria-label="Open navigation" aria-controls="sidebar" aria-expanded="false" type="button">{{ icon('menu') }}</button><span>{{ product_name }} <span class="crumb-slash">/</span> <strong>{{ 'Student workspace' if is_student_view else 'Teacher workspace' }}</strong></span></div><div class="topbar-right"><a class="faculty-chip" href="{{ url_for('student_settings' if is_student_view else 'settings') }}"><span class="avatar">{{ current_user.name[:1]|upper }}</span><span><strong>{{ current_user.name }}</strong><small>{{ current_user.student_id if is_student_view else current_user.faculty_no or 'Teacher account' }}</small></span></a><form method="post" action="{{ url_for('logout') }}">{{ csrf() }}<button class="icon-btn" type="submit" aria-label="Sign out" title="Sign out">{{ icon('logout') }}</button></form></div></header>
+<main class="main-content" id="main-content" tabindex="-1">
+<div class="page-heading"><div><div class="eyebrow">{% block eyebrow %}{{ 'MY ACADEMIC RECORD' if is_student_view else 'DEPARTMENT OF CSE' }}{% endblock %}</div><h1>{% block page_title %}Academic workspace{% endblock %}</h1><p>{% block subtitle %}{% endblock %}</p></div><div class="heading-actions">{% block actions %}{% endblock %}</div></div>
+{% with messages = get_flashed_messages(with_categories=true) %}{% for category, message in messages %}<div class="notice notice-{{ category }}" role="status">{{ icon('check' if category == 'success' else 'warning') }}<span>{{ message }}</span><button class="icon-btn notice-dismiss" type="button" aria-label="Dismiss notification">{{ icon('close') }}</button></div>{% endfor %}{% endwith %}
+{% if error %}<div class="notice notice-danger" role="alert">{{ icon('warning') }}<span>{{ error }}</span></div>{% endif %}
+{% block content %}{% endblock %}
+<footer class="page-footer"><span>{{ product_name }} · {{ 'My academic progress' if is_student_view else 'Department of CSE' }}</span><span>{{ workspace.academic_year }} / Semester {{ workspace.semester }}</span></footer>
+</main></div></div>{% block dialogs %}{% endblock %}</body></html>
